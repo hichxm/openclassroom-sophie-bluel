@@ -18,7 +18,8 @@
         <ul>
             <li><a href="index.html">projets</a></li>
             <li>contact</li>
-            <li class="text-bold"><a href="login.html">login</a></li>
+            <li id="logout-button" class="text-bold"><a href="#">logout</a></li>
+            <li id="login-button" class="text-bold"><a href="login.html">login</a></li>
             <li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
         </ul>
     </nav>
@@ -26,6 +27,10 @@
 <main>
     <section id="login">
         <h2>Login In</h2>
+        <div class="error">
+            <p></p>
+            <a href="#" class="no-text-decoration" style="color: white; position: absolute; right: 0; top: 25%; margin-right: 10px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09)">x</a>
+        </div>
         <form action="#" method="post">
             <label for="email">E-mail</label>
             <input type="text" name="email" id="email" />
@@ -33,7 +38,7 @@
             <input type="password" name="password" id="password">
             <input type="submit" value="Se connecter">
         </form>
-        <div style="text-align: center; font-size: 1.2em">
+        <div class="forgot-password">
             <a href="#">Mot de passe oublié</a>
         </div>
     </section>
@@ -45,5 +50,10 @@
         </ul>
     </nav>
 </footer>
+<script src="assets/main.js"></script>
+<script type="text/javascript">
+    // initAuthentication()
+    initLogin()
+</script>
 </body>
 </html>

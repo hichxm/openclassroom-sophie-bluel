@@ -17,7 +17,8 @@
 		<ul>
 			<li><a href="index.html">projets</a></li>
 			<li>contact</li>
-			<li><a href="login.html">login</a></li>
+			<li id="logout-button"><a href="#">logout</a></li>
+			<li id="login-button"><a href="login.html">login</a></li>
 			<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 		</ul>
 	</nav>
@@ -60,6 +61,10 @@
 		</ul>
 	</nav>
 </footer>
-<script src="assets/works.js"></script>
+<script src="assets/main.js"></script>
+<script type="text/javascript">
+	initAuthentication()
+	initIndex()
+</script>
 </body>
 </html>

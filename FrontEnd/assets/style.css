@@ -76,6 +76,10 @@ section {
     text-decoration: none;
 }
 
+.d-none {
+    display: none;
+}
+
 .text-bold {
     font-weight: bold;
 }
@@ -167,11 +171,29 @@ li:hover {
     margin-bottom: 1em;
 }
 
-#login div a {
+#login .error {
+    background-color: #f83232;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+    color: white;
+    padding: 10px;
+    display: none;
+    position: relative;
+}
+
+#login .error.error-active {
+    display: block;
+}
+
+#login .forgot-password {
+    text-align: center;
+    font-size: 1.2em
+}
+
+#login .forgot-password a {
     color: black;
 }
 
-#login div a:hover {
+#login .forgot-password a:hover {
     color: #B1663C;
 }
 
