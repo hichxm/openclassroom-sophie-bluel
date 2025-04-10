@@ -156,7 +156,16 @@ li:hover {
 
 #portfolio h2 {
     text-align: center;
-    margin-bottom: 1em;
+    position: relative;
+}
+
+#portfolio h2 a {
+    position: absolute;
+    top: 25%;
+    margin-left: 30px;
+    font-size: 15px;
+    font-family: 'Work Sans', sans-serif;
+    color: black;
 }
 
 #login {

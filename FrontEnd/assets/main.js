@@ -100,6 +100,22 @@ const hideLogoutButton = () => {
     $logoutButton.classList.add('d-none');
 }
 
+const showEditButton = () => {
+    const $editButton = document.querySelector('#portfolio h2 a');
+
+    $editButton.classList.remove('d-none');
+}
+
+const hideEditButton = () => {
+    const $editButton = document.querySelector('#portfolio h2 a');
+
+    $editButton.classList.add('d-none');
+}
+
+const changeGalleryTitleText = (text) => {
+    document.querySelector('#gallery-title').innerText = text;
+}
+
 const initIndex = async () => {
     const defineWorksInHTML = (works) => {
         const $works = document.querySelector('.gallery');
@@ -165,6 +181,11 @@ const initIndex = async () => {
 
     defineWorksInHTML(works);
     defineCategoriesInHTML(categories);
+
+    if(isAuthenticated()) {
+        changeGalleryTitleText('Mes projets');
+        showEditButton();
+    }
 }
 
 const initLogin = async () => {
@@ -230,16 +251,4 @@ const initAuthentication = async () => {
 
         window.location.href = 'index.html';
     })
-
-    const token = document.cookie
-        .split(';')
-        .find(row => row.trim().startsWith('token='))
-        .split('=')[1];
-
-    const userId = document.cookie
-        .split(';')
-        .find(row => row.trim().startsWith('userId='))
-        .split('=')[1];
-
-    console.log(token, userId);
 }
