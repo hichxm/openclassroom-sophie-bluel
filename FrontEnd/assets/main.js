@@ -161,6 +161,8 @@ const initIndex = async () => {
         })
     }
 
+    hideEditButton();
+
     const rawWorks = await getWorks();
     const rawCategories = await getCategories();
 
