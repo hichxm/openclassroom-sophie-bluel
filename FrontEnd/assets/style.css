@@ -511,3 +511,13 @@ input[type="submit"] {
     left: 20px;
     cursor: pointer;
 }
+
+.modal .modal-error {
+    background-color: #f83232;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+    color: white;
+    padding: 10px;
+    position: relative;
+    margin-bottom: 2em;
+    margin-top: -2em;
+}

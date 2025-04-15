@@ -6,17 +6,17 @@ const API_SCHEME = 'http';
 const url = new window.URL(`${API_SCHEME}://${API_ENDPOINT}:${API_PORT}`);
 
 const DELETE_BUTTON_SVG = '<svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">\n' +
-'    <rect width="17" height="17" rx="2" fill="black"/>\n' +
-'    <path d="M6.71607 3.35558C6.82455 3.13661 7.04754 3 7.29063 3H9.70938C9.95246 3 10.1754 3.13661 10.2839 3.35558L10.4286 3.64286H12.3571C12.7127 3.64286 13 3.93013 13 4.28571C13 4.64129 12.7127 4.92857 12.3571 4.92857H4.64286C4.28728 4.92857 4 4.64129 4 4.28571C4 3.93013 4.28728 3.64286 4.64286 3.64286H6.57143L6.71607 3.35558ZM4.64286 5.57143H12.3571V12C12.3571 12.7092 11.7806 13.2857 11.0714 13.2857H5.92857C5.21942 13.2857 4.64286 12.7092 4.64286 12V5.57143ZM6.57143 6.85714C6.39464 6.85714 6.25 7.00179 6.25 7.17857V11.6786C6.25 11.8554 6.39464 12 6.57143 12C6.74821 12 6.89286 11.8554 6.89286 11.6786V7.17857C6.89286 7.00179 6.74821 6.85714 6.57143 6.85714ZM8.5 6.85714C8.32321 6.85714 8.17857 7.00179 8.17857 7.17857V11.6786C8.17857 11.8554 8.32321 12 8.5 12C8.67679 12 8.82143 11.8554 8.82143 11.6786V7.17857C8.82143 7.00179 8.67679 6.85714 8.5 6.85714ZM10.4286 6.85714C10.2518 6.85714 10.1071 7.00179 10.1071 7.17857V11.6786C10.1071 11.8554 10.2518 12 10.4286 12C10.6054 12 10.75 11.8554 10.75 11.6786V7.17857C10.75 7.00179 10.6054 6.85714 10.4286 6.85714Z" fill="white"/>\n' +
-'</svg>';
+    '    <rect width="17" height="17" rx="2" fill="black"/>\n' +
+    '    <path d="M6.71607 3.35558C6.82455 3.13661 7.04754 3 7.29063 3H9.70938C9.95246 3 10.1754 3.13661 10.2839 3.35558L10.4286 3.64286H12.3571C12.7127 3.64286 13 3.93013 13 4.28571C13 4.64129 12.7127 4.92857 12.3571 4.92857H4.64286C4.28728 4.92857 4 4.64129 4 4.28571C4 3.93013 4.28728 3.64286 4.64286 3.64286H6.57143L6.71607 3.35558ZM4.64286 5.57143H12.3571V12C12.3571 12.7092 11.7806 13.2857 11.0714 13.2857H5.92857C5.21942 13.2857 4.64286 12.7092 4.64286 12V5.57143ZM6.57143 6.85714C6.39464 6.85714 6.25 7.00179 6.25 7.17857V11.6786C6.25 11.8554 6.39464 12 6.57143 12C6.74821 12 6.89286 11.8554 6.89286 11.6786V7.17857C6.89286 7.00179 6.74821 6.85714 6.57143 6.85714ZM8.5 6.85714C8.32321 6.85714 8.17857 7.00179 8.17857 7.17857V11.6786C8.17857 11.8554 8.32321 12 8.5 12C8.67679 12 8.82143 11.8554 8.82143 11.6786V7.17857C8.82143 7.00179 8.67679 6.85714 8.5 6.85714ZM10.4286 6.85714C10.2518 6.85714 10.1071 7.00179 10.1071 7.17857V11.6786C10.1071 11.8554 10.2518 12 10.4286 12C10.6054 12 10.75 11.8554 10.75 11.6786V7.17857C10.75 7.00179 10.6054 6.85714 10.4286 6.85714Z" fill="white"/>\n' +
+    '</svg>';
 
 const makeRequest = async (url, option) => {
     return await fetch(url, {
-        ...option,
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         },
+        ...option,
     });
 }
 
@@ -98,6 +98,18 @@ const logout = () => {
     localStorage.removeItem('userId');
 }
 
+const getFromStorage = (key) => {
+    return localStorage.getItem(key);
+}
+
+const getToken = () => {
+    return getFromStorage('token');
+}
+
+const getUserId = () => {
+    return getFromStorage('userId');
+}
+
 const displayLogoutButton = () => {
     const $logoutButton = document.querySelector('#logout-button');
 
@@ -174,13 +186,17 @@ const getModalGalleryContent = () => {
     return getModalGallery().querySelector('.modal-gallery-content');
 }
 
+const getModalGalleryError = () => {
+    return getModalGallery().querySelector('.modal-error');
+}
+
 const showModal = (view = 'gallery') => {
     getModal().classList.remove('d-none');
 
     getModalGallery().classList.add('d-none');
     getModalAddWork().classList.add('d-none');
 
-    if(view === 'gallery') {
+    if (view === 'gallery') {
         getModalGallery().classList.remove('d-none');
     } else if (view === 'add') {
         getModalAddWork().classList.remove('d-none');
@@ -188,13 +204,40 @@ const showModal = (view = 'gallery') => {
 }
 
 const hideModal = () => {
-    const $modal = getModal();
-
-    $modal.classList.add('d-none');
+    getModal().classList.add('d-none');
 }
 
 const changeGalleryTitleText = (text) => {
     document.querySelector('#gallery-title').innerText = text;
+}
+
+const deleteWork = async (workId) => {
+    const response = await makeRequest(new URL(`/api/works/${workId}`, url), {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+        },
+    })
+
+    if (!(response.status >= 200 && response.status < 300)) {
+        throw Error('Une erreur est survenue lors de la suppression du projet');
+    }
+
+    return true;
+}
+
+const showGalleryModalError = () => {
+    getModalGallery().querySelector('.modal-error').classList.remove('d-none');
+}
+
+const hideGalleryModalError = () => {
+    getModalGallery().querySelector('.modal-error').classList.add('d-none');
+}
+
+const defineGalleryModalError = (error) => {
+    const $pElement = getModalGalleryError().querySelector('p');
+
+    $pElement.innerText = error;
 }
 
 const initIndex = async () => {
@@ -207,6 +250,29 @@ const initIndex = async () => {
             const $divElement = buildWorkModalElement(work);
 
             $modalGallery.appendChild($divElement);
+
+            $divElement.querySelector('a').addEventListener('click', async (e) => {
+                hideGalleryModalError();
+
+                // Delete work using workId
+                try {
+                    await deleteWork(work.id);
+
+                    const newWorks = Array.from(defaultWorks).filter(defaultWork => defaultWork.id !== work.id);
+
+                    // define works in html
+                    defineWorksInHTML(newWorks);
+
+                    // define works in modal gallery
+                    defineWorksModalInHTML(newWorks);
+
+                    defaultWorks.clear();
+                    newWorks.forEach(work => defaultWorks.add(work));
+                } catch (e) {
+                    defineGalleryModalError(e.message);
+                    showGalleryModalError();
+                }
+            })
         });
     }
 
@@ -244,7 +310,7 @@ const initIndex = async () => {
                     }
                 }));
 
-                defineWorksInHTML(Array.from(works).filter(work => {
+                defineWorksInHTML(Array.from(defaultWorks).filter(work => {
                     return category.id === 0 || work.categoryId === parseInt(category.id);
                 }))
 
@@ -265,8 +331,8 @@ const initIndex = async () => {
         active: true,
     })
 
-    const works = new Set(rawWorks);
-    const categories = new Set(rawCategories.map(({id, name, active = false}) => {
+    const defaultWorks = new Set(rawWorks);
+    const defaultCategories = new Set(rawCategories.map(({id, name, active = false}) => {
         return {
             id: id,
             name: name,
@@ -274,10 +340,10 @@ const initIndex = async () => {
         };
     }));
 
-    defineWorksInHTML(works);
-    defineCategoriesInHTML(categories);
+    defineWorksInHTML(defaultWorks);
+    defineCategoriesInHTML(defaultCategories);
 
-    if(isAuthenticated()) {
+    if (isAuthenticated()) {
         // Display editor mode in the top of website
         showEditorMode();
 
@@ -288,7 +354,7 @@ const initIndex = async () => {
 
         // Hide modal when click outside (background)
         getModal().addEventListener('click', (e) => {
-            if(e.target.classList.contains('modal')) {
+            if (e.target.classList.contains('modal')) {
                 hideModal();
             }
         });
@@ -297,7 +363,7 @@ const initIndex = async () => {
         getShowEditButton().addEventListener('click', () => {
             showModal('gallery');
 
-            defineWorksModalInHTML(works);
+            defineWorksModalInHTML(defaultWorks);
 
             // When click on add project, switch to add view
             getModalGallery().querySelector('.modal-add-button').addEventListener('click', () => {
@@ -367,7 +433,6 @@ const initAuthentication = async () => {
         return;
     }
 
-    // Display logout button
     displayLogoutButton();
     hideLoginButton();
 
