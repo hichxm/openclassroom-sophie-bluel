@@ -52,8 +52,8 @@ const buildWorkElement = (work) => {
     const $imgElement = document.createElement('img');
     const $figcaptionElement = document.createElement('figcaption');
 
-    $imgElement.src = work.imageUrl
-    $imgElement.alt = work.title
+    $imgElement.src = work.imageUrl;
+    $imgElement.alt = work.title;
 
     $figcaptionElement.innerText = work.title;
 
@@ -182,6 +182,10 @@ const getModalAddWork = () => {
     return getModalContent().querySelector('#modal-add-work');
 }
 
+const getModalAddWorkCategorySelect = () => {
+    return getModalAddWork().querySelector('select[name="category"]');
+}
+
 const getModalGalleryContent = () => {
     return getModalGallery().querySelector('.modal-gallery-content');
 }
@@ -241,6 +245,29 @@ const defineGalleryModalError = (error) => {
 }
 
 const initIndex = async () => {
+    const setDefaultWorks = (newWorks) => {
+        defaultWorks.clear();
+
+        newWorks.forEach(work => defaultWorks.add(work));
+    }
+
+    const defineCategoriesAddWorkModalInHTML = (categories) => {
+        const $selectElement = getModalAddWorkCategorySelect();
+
+        $selectElement.innerHTML = '';
+
+        categories.unshift({ id: '', name: '' });
+
+        categories.forEach(category => {
+            const $optionElement = document.createElement('option');
+
+            $optionElement.value = category.id;
+            $optionElement.innerText = category.name;
+
+            $selectElement.appendChild($optionElement);
+        });
+    }
+
     const defineWorksModalInHTML = (works) => {
         const $modalGallery = getModalGalleryContent();
 
@@ -258,21 +285,21 @@ const initIndex = async () => {
                 try {
                     await deleteWork(work.id);
 
-                    const newWorks = Array.from(defaultWorks).filter(defaultWork => defaultWork.id !== work.id);
+                    const newWorks = Array.from(defaultWorks)
+                        .filter(defaultWork => defaultWork.id !== work.id);
+
+                    setDefaultWorks(newWorks);
 
                     // define works in html
                     defineWorksInHTML(newWorks);
 
                     // define works in modal gallery
                     defineWorksModalInHTML(newWorks);
-
-                    defaultWorks.clear();
-                    newWorks.forEach(work => defaultWorks.add(work));
                 } catch (e) {
                     defineGalleryModalError(e.message);
                     showGalleryModalError();
                 }
-            })
+            });
         });
     }
 
@@ -312,12 +339,12 @@ const initIndex = async () => {
 
                 defineWorksInHTML(Array.from(defaultWorks).filter(work => {
                     return category.id === 0 || work.categoryId === parseInt(category.id);
-                }))
+                }));
 
-            })
+            });
 
             $filters.appendChild($aElement);
-        })
+        });
     }
 
     hideEditButton();
@@ -329,7 +356,7 @@ const initIndex = async () => {
         id: 0,
         name: 'Tous',
         active: true,
-    })
+    });
 
     const defaultWorks = new Set(rawWorks);
     const defaultCategories = new Set(rawCategories.map(({id, name, active = false}) => {
@@ -346,6 +373,8 @@ const initIndex = async () => {
     if (isAuthenticated()) {
         // Display editor mode in the top of website
         showEditorMode();
+
+        defineCategoriesAddWorkModalInHTML(Array.from(defaultCategories).filter(category => category.id !== 0));
 
         // Change works title
         changeGalleryTitleText('Mes projets');
@@ -372,8 +401,8 @@ const initIndex = async () => {
                 // When click on back switch to gallery view
                 getModalBackButton().addEventListener('click', () => {
                     showModal('gallery')
-                })
-            })
+                });
+            });
         });
 
         // When click on closing, hide modal
@@ -390,7 +419,7 @@ const initLogin = async () => {
     const $form = document.querySelector('#login form');
 
     $form.addEventListener('submit', async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         const email = $form.querySelector('#email').value;
         const password = $form.querySelector('#password').value;
@@ -415,15 +444,15 @@ const initLogin = async () => {
 
                     window.location.href = 'index.html';
                 }
-            })
-    })
+            });
+    });
 
     const $closeLoginError = document.querySelector('#login .error');
     const $aElement = $closeLoginError.querySelector('a');
 
     $aElement.addEventListener('click', () => {
         $closeLoginError.classList.remove('error-active');
-    })
+    });
 }
 
 const initAuthentication = async () => {
@@ -442,5 +471,5 @@ const initAuthentication = async () => {
         logout();
 
         window.location.href = 'index.html';
-    })
+    });
 }
