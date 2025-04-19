@@ -182,8 +182,41 @@ const getModalAddWork = () => {
     return getModalContent().querySelector('#modal-add-work');
 }
 
+const getModalAddWorkPreview = () => {
+    return getModalAddWorkForm().querySelector('.modal-image-preview');
+}
+
+const getModalAddWorkUploadDiv = () => {
+    return getModalAddWorkForm().querySelector('.modal-image-upload');
+}
+
+const getModalAddWorkPreviewImage = () => {
+    return getModalAddWorkPreview().querySelector('img');
+}
+
+const getModalAddWorkAddImageButton = () => {
+    return getModalAddWorkForm().querySelector('a');
+}
+
+const getModalAddWorkTitleInput = () => {
+    return getModalAddWorkForm().querySelector('input[name="title"]');
+}
+
+
 const getModalAddWorkCategorySelect = () => {
-    return getModalAddWork().querySelector('select[name="category"]');
+    return getModalAddWorkForm().querySelector('select[name="category"]');
+}
+
+const getModalAddWorkImageInput = () => {
+    return getModalAddWorkForm().querySelector('input[name="image"]');
+}
+
+const getModalAddWorkForm = () => {
+    return getModalAddWork().querySelector('form');
+}
+
+const getModalAddWorkSubmitButton = () => {
+    return getModalAddWorkForm().querySelector('input[type="submit"]');
 }
 
 const getModalGalleryContent = () => {
@@ -192,6 +225,10 @@ const getModalGalleryContent = () => {
 
 const getModalGalleryError = () => {
     return getModalGallery().querySelector('.modal-error');
+}
+
+const getModalAddWorkError = () => {
+    return getModalAddWork().querySelector('.modal-error');
 }
 
 const showModal = (view = 'gallery') => {
@@ -209,10 +246,62 @@ const showModal = (view = 'gallery') => {
 
 const hideModal = () => {
     getModal().classList.add('d-none');
+
+    resetAddWorkForm();
+}
+
+const showAddWorkPreview = () => {
+    getModalAddWorkPreview().classList.remove('d-none');
+}
+
+const hideAddWorkPreview = () => {
+    getModalAddWorkPreview().classList.add('d-none');
+}
+
+const showAddWorkUploadDiv = () => {
+    getModalAddWorkUploadDiv().classList.remove('d-none');
+}
+
+const hideAddWorkUploadDiv = () => {
+    getModalAddWorkUploadDiv().classList.add('d-none');
+}
+
+const enableAddWorkSubmitButton = () => {
+    getModalAddWorkSubmitButton().removeAttribute('disabled');
+}
+
+const disableAddWorkSubmitButton = () => {
+    getModalAddWorkSubmitButton().setAttribute('disabled', '');
 }
 
 const changeGalleryTitleText = (text) => {
     document.querySelector('#gallery-title').innerText = text;
+}
+
+const addWork = async (workForUpload) => {
+    const formData = new FormData();
+
+    formData.append('title', workForUpload.title);
+    formData.append('category', workForUpload.categoryId);
+    formData.append('image', workForUpload.imageAsFiles, 'image.jpg');
+
+    const response = await makeRequest(new URL('/api/works', url), {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Accept': 'application/json',
+        },
+        body: formData,
+    });
+
+    if (!(response.status >= 200 && response.status < 300 || response.status === 400)) {
+        throw Error('Une erreur est survenue lors de l\'ajout du projet');
+    }
+
+    return {
+        status: response.status,
+        result: await response.json()
+    };
 }
 
 const deleteWork = async (workId) => {
@@ -230,6 +319,20 @@ const deleteWork = async (workId) => {
     return true;
 }
 
+const showAddWorkModalError = () => {
+    getModalAddWork().querySelector('.modal-error').classList.remove('d-none');
+}
+
+const hideAddWorkModalError = () => {
+    getModalAddWork().querySelector('.modal-error').classList.add('d-none');
+}
+
+const defineAddWorkModalError = (error) => {
+    const $pElement = getModalAddWorkError().querySelector('p');
+
+    $pElement.innerText = error;
+}
+
 const showGalleryModalError = () => {
     getModalGallery().querySelector('.modal-error').classList.remove('d-none');
 }
@@ -242,6 +345,56 @@ const defineGalleryModalError = (error) => {
     const $pElement = getModalGalleryError().querySelector('p');
 
     $pElement.innerText = error;
+}
+
+const getAddWorkFormInputs = () => {
+    return [
+        getModalAddWorkTitleInput(),
+        getModalAddWorkCategorySelect(),
+        getModalAddWorkImageInput(),
+    ];
+}
+
+const resetAddWorkForm = () => {
+    const $inputs = getAddWorkFormInputs();
+
+    $inputs.forEach($input => {
+        switch ($input.getAttribute('name')) {
+            case 'title':
+                $input.value = '';
+                break;
+            case 'image':
+                $input.value = '';
+                showAddWorkUploadDiv();
+                hideAddWorkPreview();
+                break;
+            case 'category':
+                $input.selectedIndex = 0;
+                break;
+        }
+    })
+}
+
+const handleAddWorkFormChange = () => {
+    try {
+        getAddWorkFormInputs().forEach($input => {
+            switch ($input.getAttribute('name')) {
+                case 'title':
+                    if ($input.value.length === 0) throw Error('Le titre est obligatoire');
+                    break;
+                case 'category':
+                    if($input.selected === 0) throw Error('La catégorie est obligatoire');
+                    break;
+                case 'image':
+                    if($input.files.length === 0) throw Error('Une image est obligatoire');
+                    break;
+            }
+        });
+
+        enableAddWorkSubmitButton();
+    } catch (error) {
+        disableAddWorkSubmitButton();
+    }
 }
 
 const initIndex = async () => {
@@ -291,7 +444,9 @@ const initIndex = async () => {
                     setDefaultWorks(newWorks);
 
                     // define works in html
-                    defineWorksInHTML(newWorks);
+                    defineWorksInHTML(Array.from(newWorks).filter(work => {
+                        return selectedCategory === 0 || work.categoryId === parseInt(selectedCategory);
+                    }));
 
                     // define works in modal gallery
                     defineWorksModalInHTML(newWorks);
@@ -330,17 +485,18 @@ const initIndex = async () => {
             $aElement.addEventListener('click', (e) => {
                 e.preventDefault();
 
+                selectedCategory = category.id
+
                 defineCategoriesInHTML(Array.from(categories).map(cat => {
                     return {
                         ...cat,
-                        active: cat.id === parseInt(category.id),
+                        active: cat.id === parseInt(selectedCategory),
                     }
                 }));
 
                 defineWorksInHTML(Array.from(defaultWorks).filter(work => {
-                    return category.id === 0 || work.categoryId === parseInt(category.id);
+                    return selectedCategory === 0 || parseInt(work.categoryId) === parseInt(selectedCategory);
                 }));
-
             });
 
             $filters.appendChild($aElement);
@@ -358,6 +514,8 @@ const initIndex = async () => {
         active: true,
     });
 
+    let selectedCategory = 0;
+
     const defaultWorks = new Set(rawWorks);
     const defaultCategories = new Set(rawCategories.map(({id, name, active = false}) => {
         return {
@@ -371,42 +529,97 @@ const initIndex = async () => {
     defineCategoriesInHTML(defaultCategories);
 
     if (isAuthenticated()) {
+        // Main change
         // Display editor mode in the top of website
         showEditorMode();
-
-        defineCategoriesAddWorkModalInHTML(Array.from(defaultCategories).filter(category => category.id !== 0));
-
         // Change works title
         changeGalleryTitleText('Mes projets');
-
+        // Show edit button
         showEditButton();
 
+        // Modal
+        // Show modal when click edit button
+        getShowEditButton().addEventListener('click', () => showModal('gallery'));
+        // When click on closing, hide modal
+        getModalCloseButton().addEventListener('click', hideModal);
         // Hide modal when click outside (background)
         getModal().addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
                 hideModal();
             }
         });
+        // Change view using modal navigation button
+        getModalGallery().querySelector('.modal-add-button').addEventListener('click', () => {
+            showModal('add');
 
-        // Show modal when click edit button
-        getShowEditButton().addEventListener('click', () => {
-            showModal('gallery');
-
-            defineWorksModalInHTML(defaultWorks);
-
-            // When click on add project, switch to add view
-            getModalGallery().querySelector('.modal-add-button').addEventListener('click', () => {
-                showModal('add');
-
-                // When click on back switch to gallery view
-                getModalBackButton().addEventListener('click', () => {
-                    showModal('gallery')
-                });
+            // When click on back switch to gallery view
+            getModalBackButton().addEventListener('click', () => {
+                showModal('gallery');
+                resetAddWorkForm();
             });
         });
 
-        // When click on closing, hide modal
-        getModalCloseButton().addEventListener('click', hideModal);
+        // Modal : Gallery view
+        // Add works
+        defineWorksModalInHTML(defaultWorks);
+
+        // Modal : Add view
+        // Add categories
+        defineCategoriesAddWorkModalInHTML(Array.from(defaultCategories).filter(category => category.id !== 0));
+        // Open file explorer when the add image button is clicked
+        getModalAddWorkAddImageButton().addEventListener('click', (e) => {
+            getModalAddWorkImageInput().click();
+        });
+        // Add event listener for the file input change event
+        getModalAddWorkImageInput().addEventListener('change', (e) => {
+            const file = e.target.files[0]; // Get the first selected file
+
+            // If no file is selected, show upload section and hide preview section
+            if (!file) {
+                showAddWorkUploadDiv();
+                hideAddWorkPreview();
+                return;
+            }
+
+            // If a file is selected, show the preview section, hide the upload section
+            showAddWorkPreview();
+            hideAddWorkUploadDiv();
+
+            // Set the selected file as a preview image using a temporary URL generated by the browser
+            getModalAddWorkPreviewImage().src = URL.createObjectURL(file);
+        });
+        // On inputs change and filled, enable submit button
+        getAddWorkFormInputs().forEach($input => $input.addEventListener('change', handleAddWorkFormChange));
+        // On submit form, add work
+        getModalAddWorkForm().addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const workResponse = await addWork({
+                title: getModalAddWorkTitleInput().value,
+                categoryId: parseInt(getModalAddWorkCategorySelect().value),
+                imageAsFiles: getModalAddWorkImageInput().files[0],
+            });
+
+            if(workResponse.status === 400) {
+                defineAddWorkModalError('Veuillez saisir tout les champs');
+                showAddWorkModalError();
+                return;
+            }
+
+            resetAddWorkForm();
+            handleAddWorkFormChange();
+
+            defaultWorks.add(workResponse.result);
+
+            console.log(defaultWorks, selectedCategory)
+
+            defineWorksInHTML(Array.from(defaultWorks).filter(work => {
+                return selectedCategory === 0 || parseInt(work.categoryId) === parseInt(selectedCategory);
+            }));
+            defineWorksModalInHTML(defaultWorks);
+
+            showModal('gallery');
+        })
     }
 }
 
