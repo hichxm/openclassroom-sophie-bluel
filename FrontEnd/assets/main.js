@@ -391,6 +391,7 @@ const resetAddWorkForm = () => {
     })
 
     handleAddWorkFormChange();
+    hideAddWorkModalError();
 }
 
 const validateAddWorkFromInput = ($input, finalValidation = false) => {
