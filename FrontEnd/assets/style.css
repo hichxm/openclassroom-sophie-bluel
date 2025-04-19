@@ -103,7 +103,8 @@ h2 {
     font-family: 'Syne';
     font-weight: 700;
     font-size: 30px;
-    color: #1D6154
+    color: #1D6154;
+    margin-bottom: 1em;
 }
 
 nav ul {
@@ -317,6 +318,7 @@ footer nav ul {
     gap: 20px;
     width: 100%;
     margin-bottom: 2em;
+    margin-top: 0;
     font-size: 1.3em;
 }
 

@@ -134,6 +134,22 @@ const hideLogoutButton = () => {
     $logoutButton.classList.add('d-none');
 }
 
+const getFilterDiv = () => {
+    return document.querySelector('#portfolio .filters');
+}
+
+const hideFilterDiv = () => {
+    const $filterDiv = getFilterDiv();
+
+    $filterDiv.classList.add('d-none');
+}
+
+const showFilterDiv = () => {
+    const $filterDiv = getFilterDiv();
+
+    $filterDiv.classList.remove('d-none');
+}
+
 const getShowEditButton = () => {
     return document.querySelector('#portfolio h2 a');
 }
@@ -373,23 +389,28 @@ const resetAddWorkForm = () => {
                 break;
         }
     })
+
+    handleAddWorkFormChange();
+}
+
+const validateAddWorkFromInput = ($input, finalValidation = false) => {
+    switch ($input.getAttribute('name')) {
+        case 'title':
+            if ($input.value.length === 0) throw Error('Le titre est obligatoire');
+            break;
+        case 'category':
+            if($input.selectedIndex === 0) throw Error('La catégorie est obligatoire');
+            break;
+        case 'image':
+            if($input.files.length === 0) throw Error('Une image est obligatoire');
+            if(finalValidation && $input.files[0].size > (1024 * 1024 * 4)) throw Error('La taille maximale autorisé de l\'image est de 4 Mo');
+            break;
+    }
 }
 
 const handleAddWorkFormChange = () => {
     try {
-        getAddWorkFormInputs().forEach($input => {
-            switch ($input.getAttribute('name')) {
-                case 'title':
-                    if ($input.value.length === 0) throw Error('Le titre est obligatoire');
-                    break;
-                case 'category':
-                    if($input.selected === 0) throw Error('La catégorie est obligatoire');
-                    break;
-                case 'image':
-                    if($input.files.length === 0) throw Error('Une image est obligatoire');
-                    break;
-            }
-        });
+        getAddWorkFormInputs().forEach($input => validateAddWorkFromInput($input));
 
         enableAddWorkSubmitButton();
     } catch (error) {
@@ -536,10 +557,16 @@ const initIndex = async () => {
         changeGalleryTitleText('Mes projets');
         // Show edit button
         showEditButton();
+        // Hide filters
+        selectedCategory = 0;
+        hideFilterDiv();
 
         // Modal
         // Show modal when click edit button
-        getShowEditButton().addEventListener('click', () => showModal('gallery'));
+        getShowEditButton().addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('gallery');
+        });
         // When click on closing, hide modal
         getModalCloseButton().addEventListener('click', hideModal);
         // Hide modal when click outside (background)
@@ -549,11 +576,13 @@ const initIndex = async () => {
             }
         });
         // Change view using modal navigation button
-        getModalGallery().querySelector('.modal-add-button').addEventListener('click', () => {
+        getModalGallery().querySelector('.modal-add-button').addEventListener('click', (e) => {
+            e.preventDefault();
             showModal('add');
 
             // When click on back switch to gallery view
-            getModalBackButton().addEventListener('click', () => {
+            getModalBackButton().addEventListener('click', (e) => {
+                e.preventDefault();
                 showModal('gallery');
                 resetAddWorkForm();
             });
@@ -568,6 +597,7 @@ const initIndex = async () => {
         defineCategoriesAddWorkModalInHTML(Array.from(defaultCategories).filter(category => category.id !== 0));
         // Open file explorer when the add image button is clicked
         getModalAddWorkAddImageButton().addEventListener('click', (e) => {
+            e.preventDefault();
             getModalAddWorkImageInput().click();
         });
         // Add event listener for the file input change event
@@ -594,6 +624,15 @@ const initIndex = async () => {
         getModalAddWorkForm().addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            try {
+                getAddWorkFormInputs().forEach($input => validateAddWorkFromInput($input, true));
+            } catch (error) {
+                disableAddWorkSubmitButton();
+                defineAddWorkModalError(error.message);
+                showAddWorkModalError();
+                return;
+            }
+
             const workResponse = await addWork({
                 title: getModalAddWorkTitleInput().value,
                 categoryId: parseInt(getModalAddWorkCategorySelect().value),
@@ -607,7 +646,6 @@ const initIndex = async () => {
             }
 
             resetAddWorkForm();
-            handleAddWorkFormChange();
 
             defaultWorks.add(workResponse.result);
 
