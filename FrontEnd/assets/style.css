@@ -496,6 +496,13 @@ input[type="submit"]:disabled {
     height: 170px;
     width: 100%;
     padding: 20px 0;
+    position: relative;
+}
+
+.modal .modal-content #modal-add-work .modal-image-preview .modal-image-preview-delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
 
 .modal .modal-content #modal-add-work .modal-image-preview {

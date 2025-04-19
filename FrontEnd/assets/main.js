@@ -247,6 +247,10 @@ const getModalAddWorkError = () => {
     return getModalAddWork().querySelector('.modal-error');
 }
 
+const getModalAddWorkRemoveImageButton = () => {
+    return getModalAddWorkForm().querySelector('.modal-image-preview-delete');
+}
+
 const showModal = (view = 'gallery') => {
     getModal().classList.remove('d-none');
 
@@ -658,6 +662,15 @@ const initIndex = async () => {
             defineWorksModalInHTML(defaultWorks);
 
             showModal('gallery');
+        })
+        // Remove preview
+        getModalAddWorkRemoveImageButton().addEventListener('click', (e) => {
+            e.preventDefault();
+
+            getModalAddWorkImageInput().value = '';
+
+            showAddWorkUploadDiv();
+            hideAddWorkPreview();
         })
     }
 }
