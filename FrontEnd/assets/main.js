@@ -493,7 +493,7 @@ const initIndex = async () => {
             const $figureElement = buildWorkElement(work);
 
             $works.appendChild($figureElement);
-        })
+        });
     }
 
     const defineCategoriesInHTML = (categories) => {
@@ -662,7 +662,7 @@ const initIndex = async () => {
             defineWorksModalInHTML(defaultWorks);
 
             showModal('gallery');
-        })
+        });
         // Remove preview
         getModalAddWorkRemoveImageButton().addEventListener('click', (e) => {
             e.preventDefault();
@@ -671,7 +671,7 @@ const initIndex = async () => {
 
             showAddWorkUploadDiv();
             hideAddWorkPreview();
-        })
+        });
     }
 }
 
